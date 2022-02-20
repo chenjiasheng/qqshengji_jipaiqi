@@ -347,7 +347,7 @@ class JiPaiQi():
         color = color[1:]
         return color
 
-    def parse_out_cards(self, cards):
+    def analyze_out_cards(self, cards):
         # num_triples, num_pairs, num_singles, num_others
         round_type = self.get_card_type(self.out_cards[-1][0][1][0])
 
@@ -362,11 +362,14 @@ class JiPaiQi():
             stat[card] += 1
         values = list(stat.values())
         assert all(1 <= x <= self.jifupai for x in values)
-        s = len(cards_with_right_type)
-        p = sum(x // 2 for x in values)
-        t = sum(x // 3 for x in values)
-        q = sum(x // 4 for x in values)
-        return s, p, t, q
+        # s = len(cards_with_right_type)
+        # p = sum(x // 2 for x in values)
+        # t = sum(x // 3 for x in values)
+        # q = sum(x // 4 for x in values)
+        stat_by_type = [0] * 4
+        for x in values:
+            stat_by_type[x] += 1
+        return stat_by_type
 
     def withdraw_cards(self):
         assert len(self.out_cards[-1]) == 1
@@ -382,24 +385,55 @@ class JiPaiQi():
         first_card = self.out_cards[-1][0][1]
         card_type = self.get_card_type(first_card[0])
 
-        s, p, t, q = self.parse_out_cards(first_card)
-        s1, p1, t1, q1 = self.parse_out_cards(out_card)
+        s, p, t, q = self.analyze_out_cards(first_card)
+        s1, p1, t1, q1 = self.analyze_out_cards(out_card)
 
-        lack_single = (s1 < s)
-        lack_pair = (p1 < p)
-        lack_triple = (t1 < t)
-        lack_quadra = (q1 < q)
+        def get_lack_level(s, p, t, q, s1, p1, t1, q1):
+            lack_single = (s1 + p1 * 2 + t1 * 3 + q1 * 4 < s + p * 2 + t * 3 + q * 4)
+            # lack_pair = (p1 < p)
+            lack_triple = (t1 + q1 < t + q)
+            lack_quadra = (q1 < q)
 
-        if lack_single:
-            lack_level = 1
-        elif lack_pair:
-            lack_level = 2
-        elif lack_triple:
-            lack_level = 3
-        elif lack_quadra:
-            lack_level = 4
-        else:
-            lack_level = 5
+            p0 = min(p, p1)
+            p -= p0
+            p1 -= p0
+            t0 = min(t, t1)
+            t -= t0
+            t1 -= t0
+            q0 = min(q, q1)
+            q -= q0
+            q1 -= q0
+            # if q != 0:
+            #     t1 -= min(q, t1)
+            #     q -= min(q, t1)
+            # if
+            if q != 0 and t != 0:
+                pass
+            elif q != 0 and t == 0:
+                q0 = min(q, t1)
+                t1 -= q0
+                q -= q0
+            elif q == 0 and t != 0:
+                t0 = min(t, q1)
+                t -= t0
+                q1 -= t0
+            else:
+                pass
+            lack_pair = (p1 + t1 + q1 * 2) < (p + t + q * 2)
+
+            if lack_single:
+                lack_level = 1
+            elif lack_pair:
+                lack_level = 2
+            elif lack_triple:
+                lack_level = 3
+            elif lack_quadra:
+                lack_level = 4
+            else:
+                lack_level = 5
+            return lack_level
+
+        lack_level = get_lack_level(s, p, t, q, s1, p1, t1, q1)
         type_idx = CARD_TYPES.index(card_type)
 
         if lack_level < self.lack_list[who][type_idx]:
