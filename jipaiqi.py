@@ -190,6 +190,20 @@ class JiPaiQi():
             cv2.imwrite(img_fname, img)
 
     def step(self):
+        from parse_cards import OutCardsBlockedException
+        try:
+            return self._step()
+        except OutCardsBlockedException as e:
+            print("OutCardsBlockedException, who=", e.who)
+            self.initialized = False
+            print(self.timestamp, 'game end')
+            self.log()
+            self.record_screenshot(self.timestamp, self.img, False)
+            if not self.loop:
+                return None
+            return True
+
+    def _step(self):
         frame = self.img_generator.next()
         if frame is None:
             return None
@@ -634,7 +648,7 @@ def jipaiqi_to_table_content(jipaiqi):
 
 
 if __name__ == '__main__':
-    jipaiqi = JiPaiQi(img_dir='1645348268', do_record=False, loop=False)
+    jipaiqi = JiPaiQi(img_dir='1645348843', do_record=False, loop=False)
     while True:
         res = jipaiqi.step()
         if res is None:

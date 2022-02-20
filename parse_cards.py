@@ -190,10 +190,17 @@ def _parse_player3_out_cards_fallback(img_rgb, img_gray):
     return result1 + result2
 
 
+class OutCardsBlockedException(Exception):
+    def __init__(self, who):
+        super(OutCardsBlockedException, self).__init__()
+        self.who = who
+
 def parse_out_cards(img_rgb, img_gray, who, my_cards=None, all_out_cards=None):
     result = _parse_out_cards(img_rgb, img_gray, who)
     if result == "OUT_CARDS_BLOCKED":
-        assert who in [2, 3]
+        # assert who in [2, 3]
+        if who not in [2, 3]:
+            raise OutCardsBlockedException(who)
         if who == 2:
             result = _parse_self_out_cards_fallback(img_rgb, img_gray, my_cards, all_out_cards)
             return result
