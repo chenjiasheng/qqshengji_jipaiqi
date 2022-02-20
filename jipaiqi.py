@@ -368,7 +368,7 @@ class JiPaiQi():
         # q = sum(x // 4 for x in values)
         stat_by_type = [0] * 4
         for x in values:
-            stat_by_type[x] += 1
+            stat_by_type[x-1] += 1
         return stat_by_type
 
     def withdraw_cards(self):
@@ -390,7 +390,6 @@ class JiPaiQi():
 
         def get_lack_level(s, p, t, q, s1, p1, t1, q1):
             lack_single = (s1 + p1 * 2 + t1 * 3 + q1 * 4 < s + p * 2 + t * 3 + q * 4)
-            # lack_pair = (p1 < p)
             lack_triple = (t1 + q1 < t + q)
             lack_quadra = (q1 < q)
 
@@ -403,10 +402,7 @@ class JiPaiQi():
             q0 = min(q, q1)
             q -= q0
             q1 -= q0
-            # if q != 0:
-            #     t1 -= min(q, t1)
-            #     q -= min(q, t1)
-            # if
+
             if q != 0 and t != 0:
                 pass
             elif q != 0 and t == 0:
@@ -638,7 +634,7 @@ def jipaiqi_to_table_content(jipaiqi):
 
 
 if __name__ == '__main__':
-    jipaiqi = JiPaiQi(img_dir='bug_1645289726', do_record=False, loop=False)
+    jipaiqi = JiPaiQi(img_dir='1645348268', do_record=False, loop=False)
     while True:
         res = jipaiqi.step()
         if res is None:
