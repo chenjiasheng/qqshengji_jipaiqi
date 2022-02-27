@@ -124,9 +124,9 @@ def _parse_out_cards(img_rgb, img_gray, who):
     if who == 0:
         region = [805-250, 315, 805+250, 359]
     elif who == 1:
-        region = [170, 429, 791, 476]
+        region = [170, 429, 810, 476]
     elif who == 3:
-        region = [800, 429, 1440, 476]
+        region = [810, 429, 1440, 476]
     else:
         region = [805-250, 561, 805+250, 605]
     result = parse_cards_with_color(img_rgb, img_gray, region)
